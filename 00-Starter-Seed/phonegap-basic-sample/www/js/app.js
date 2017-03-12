@@ -1,8 +1,9 @@
 document.addEventListener('deviceready',function() {
 var lock = new Auth0Lock(
-  'oeT90K3VhaLdxzIOI6XrHjlrYdZlgb8L',
-  'tutorials.auth0.com'
+  'YOUR_CLIENT_ID',
+  'YOUR_AUTH0_DOMAIN'
 );
+
 
 
  $('.btn-login').click(function(e) {
