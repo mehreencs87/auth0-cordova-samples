@@ -1,57 +1,38 @@
 document.addEventListener('deviceready',function() {
-    var lock = new Auth0Lock(
-      // All these properties are set in auth0-variables.js
-      AUTH0_CLIENT_ID,
-      AUTH0_DOMAIN
-    );
+var lock = new Auth0Lock(
+  'oeT90K3VhaLdxzIOI6XrHjlrYdZlgb8L',
+  'tutorials.auth0.com'
+);
 
-    var userProfile;
 
-    $('.btn-login').click(function(e) {
+ $('.btn-login').click(function(e) {
       e.preventDefault();
-      lock.show(function(err, profile, token) {
-        if (err) {
-          // Error callback
-          console.log("There was an error");
-          alert("There was an error logging in");
-        } else {
-          // Success calback
-
-          // Save the JWT token.
-          localStorage.setItem('userToken', token);
-
-          // Save the profile
-          userProfile = profile;
-
-          $('.login-box').hide();
-          $('.logged-in-box').show();
-          $('.nickname').text(profile.nickname);
-          $('.nickname').text(profile.name);
-          $('.avatar').attr('src', profile.picture);
-        }
-      });
+      lock.show();
     });
+// Listening for the authenticated event
+lock.on("authenticated", function(authResult) {
+  // Use the token in authResult to getUserInfo() and save it to localStorage
+  lock.getUserInfo(authResult.accessToken, function(error, profile) {
+    if (error) {
+      // Handle error
+      return;
+    }
 
-    $.ajaxSetup({
-      'beforeSend': function(xhr) {
-        if (localStorage.getItem('userToken')) {
-          xhr.setRequestHeader('Authorization',
-                'Bearer ' + localStorage.getItem('userToken'));
-        }
-      }
-    });
+    localStorage.setItem('accessToken', authResult.accessToken);
+    localStorage.setItem('profile', JSON.stringify(profile));
+  });
+});
 
-    $('.btn-api').click(function(e) {
-      // Just call your API here. The header will be sent
-      $.ajax({
-        url: 'http://auth0-nodejsapi-sample.herokuapp.com/secured/ping',
-        method: 'GET'
-      }).then(function(data, textStatus, jqXHR) {
-        alert("The request to the secured enpoint was successfull");
-      }, function() {
-        alert("You need to download the server seed and start it to call this API");
-      });
-    });
 
+var token = localStorage.getItem('accessToken');
+if (token) {
+  showLoggedIn();
+}
+
+// Display the user's profile
+function showLoggedIn() {
+  var profile = JSON.parse(localStorage.getItem('profile'));
+  document.getElementById('nick').textContent = profile.nickname;
+}
 
 }, false);
